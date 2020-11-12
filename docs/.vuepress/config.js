@@ -26,6 +26,9 @@ module.exports = {
             '/feInterview/': [
                 ['JS_base', 'JS基础']
             ],
+            '/JSalgorithm/': [
+                ['string', '字符串']
+            ]
         },
         sidebarDepth: 2,
         lastUpdated: 'Last Updated',
