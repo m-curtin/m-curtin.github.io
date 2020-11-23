@@ -1,7 +1,7 @@
 
 module.exports = {
-    title: '前端知识总结',
-    description: '冲呀！大前端。',
+    title: '前端知识图谱',
+    description: '男儿的事业原本要昼夜不停',
     head: [
         ['link', { rel: 'shortcut icon', type: "image/x-icon", href: `https://s1.ax1x.com/2020/06/21/N11p8I.th.jpg` }]
     ],
@@ -10,15 +10,20 @@ module.exports = {
         nav: [
             { text: '主页', link: '/' },
             {
-                text: '知识图谱',
+                text: '前端笔记',
                 items: [
                     { text: '前端基础', link: '/feInterview/' },
                     { text: '前端框架', link: '/feFramework/' },
-                    { text: '计算机基础', link: '/csInterview/' },
-                    { text: '算法与数据结构', link: '/JSalgorithm/' },
-                    { text: 'JavaScript手搓实现', link: '/JSachieve/' },
                 ]
             },
+            {
+                text: '计算机基础',
+                items: [
+                    { text: '计算机网络', link: '/csInterview/' },
+                    { text: '数据结构', link: '/JSalgorithm/' },
+                ]
+            },
+            { text: 'JS coding', link: '/JSachieve/' },
             { text: '参考', link: '/about/' },
             { text: 'Github', link: 'https://www.github.com/nonentityboy' },
         ],
@@ -27,6 +32,13 @@ module.exports = {
                 ['JS_base', 'JS基础']
             ],
             '/JSalgorithm/': [
+                ['array', '数组'],
+                ['string', '字符串']
+            ],
+            '/feFramework/': [
+                ['react', 'React']
+            ],
+            '/JSachieve/': [
                 ['array', '数组'],
                 ['string', '字符串']
             ]
