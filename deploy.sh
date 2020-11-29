@@ -1,4 +1,4 @@
-#!/bin/bash 注释 暂时有问题CMD不能到git里面来
+#!/bin/bash
 echo "-------Begin-------"
 git status
 git add .
