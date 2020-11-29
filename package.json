@@ -5,6 +5,7 @@
     "main": "index.js",
     "scripts": {
         "dev": "vuepress dev",
+        "add": "sh ./deploy.sh",
         "build": "vuepress build",
         "deploy": "tcb framework deploy"
     },
