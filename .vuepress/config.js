@@ -13,6 +13,7 @@ module.exports = {
                 items: [
                     { text: '前端基础', link: '/feInterview/' },
                     { text: '前端框架', link: '/feFramework/' },
+                    { text: '浏览器相关', link: '/browser/' },
                 ]
             },
             {
@@ -40,6 +41,9 @@ module.exports = {
             '/JSachieve/': [
                 ['array', '数组'],
                 ['string', '字符串']
+            ],
+            '/browser/': [
+                ['chrome', 'Chrome']
             ]
         },
         sidebarDepth: 2,
@@ -48,6 +52,5 @@ module.exports = {
             logo: 'https://s1.ax1x.com/2020/06/21/N11p8I.th.jpg',
             sidebar: 'auto'
         }
-
     },
 }

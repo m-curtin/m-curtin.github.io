@@ -1,6 +1,16 @@
 {
+    "name": "vuepress-blog",
+    "version": "1.0.0",
+    "description": "Curtin's knowledge",
+    "main": "index.js",
     "scripts": {
-        "dev": "vuepress dev docs",
-        "build": "vuepress build docs"
+        "dev": "vuepress dev",
+        "build": "vuepress build",
+        "deploy": "tcb framework deploy"
+    },
+    "author": "BookerZhao",
+    "license": "ISC",
+    "devDependencies": {
+        "vuepress": "^1.5.0"
     }
 }
