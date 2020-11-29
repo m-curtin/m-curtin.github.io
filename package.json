@@ -8,7 +8,7 @@
         "build": "vuepress build",
         "deploy": "sh ./deploy.sh && tcb framework deploy"
     },
-    "author": "BookerZhao",
+    "author": "Curtin",
     "license": "ISC",
     "devDependencies": {
         "vuepress": "^1.5.0"
