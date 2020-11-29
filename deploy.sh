@@ -4,6 +4,7 @@ git status
 git add .
 read -p "提交信息:" commitinfo
 git commit -m $commitinfo
-git push -u origin master
+git pull –-rebase origin master
+git push origin master
 echo "--------End--------"
 read -p "Enter a number:" num
