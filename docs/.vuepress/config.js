@@ -1,4 +1,3 @@
-
 module.exports = {
     title: '前端知识图谱',
     description: '男儿的事业原本要昼夜不停',
@@ -23,7 +22,7 @@ module.exports = {
                     { text: '数据结构', link: '/JSalgorithm/' },
                 ]
             },
-            { text: 'JS coding', link: '/JSachieve/' },
+            { text: 'JS Coding', link: '/JSachieve/' },
             { text: '参考', link: '/about/' },
             { text: 'Github', link: 'https://www.github.com/nonentityboy' },
         ],
