@@ -6,8 +6,8 @@
     "scripts": {
         "dev": "vuepress dev",
         "build": "vuepress build",
-        "push": "sh ./deploy.sh",
-        "deploy": "sh ./deploy.sh && tcb framework deploy"
+        "push": "sh ./push.sh",
+        "deploy": "sh ./push.sh && tcb framework deploy"
     },
     "author": "Curtin",
     "license": "ISC",
