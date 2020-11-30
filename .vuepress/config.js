@@ -29,7 +29,7 @@ module.exports = {
         ],
         sidebar: {
             '/feInterview/': [
-                ['CSS', 'CSS'],
+                ['css', 'CSS'],
                 ['JS_base', 'JS基础']
             ],
             '/JSalgorithm/': [
