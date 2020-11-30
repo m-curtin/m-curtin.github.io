@@ -6,6 +6,7 @@
     "scripts": {
         "dev": "vuepress dev",
         "build": "vuepress build",
+        "push": "sh ./deploy.sh",
         "deploy": "sh ./deploy.sh && tcb framework deploy"
     },
     "author": "Curtin",
