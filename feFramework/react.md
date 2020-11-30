@@ -108,7 +108,6 @@ function App(props) {
 ```
 
 #### 三目运算符
-
 ```js
 render() {
   const isLoggedIn = this.state.isLoggedIn;
