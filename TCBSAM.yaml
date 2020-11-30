@@ -33,13 +33,13 @@ Resources:
     Type: 'CloudBase::StaticStore'
     Properties:
       Description: 为开发者提供静态网页托管的能力，包括HTML、CSS、JavaScript、字体等常见资源。
-      CodeUri: 'extension://681f6a72c79f4288bd46dc14d37afb63.zip'
+      CodeUri: 'extension://7d5a97c301fc4c67b81c71ee3a94a2e1.zip'
       DeployPath: /
   ConfigEnv:
     Type: 'CloudBase::StaticStore'
     Properties:
       Description: 配置文件
-      CodeUri: 'extension://3d5c690631c146a7afa315511c3e1705.zip'
+      CodeUri: 'extension://b1042ddb7c5742dfae272a635c0ab46c.zip'
       DeployPath: /
 EntryPoint:
   - Label: 网站入口
