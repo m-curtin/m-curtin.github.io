@@ -24,6 +24,10 @@ module.exports = {
                 ]
             },
             { text: 'JS Coding', link: '/JSachieve/' },
+            {
+                text: '生产工具',
+                link: '/Tools/'
+            },
             { text: '参考', link: '/about/' },
             { text: 'Github', link: 'https://www.github.com/nonentityboy' },
         ],
