@@ -42,6 +42,7 @@ module.exports = {
             ],
             '/Tools/': [
                 ['git', 'Git'],
+                ['esp8266', 'ESP8266'],
             ],
             '/feFramework/': [
                 ['react', 'React']
