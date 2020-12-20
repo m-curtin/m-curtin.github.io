@@ -40,6 +40,9 @@ module.exports = {
                 ['array', '数组'],
                 ['string', '字符串']
             ],
+            '/Tools/': [
+                ['git', 'Git'],
+            ],
             '/feFramework/': [
                 ['react', 'React']
             ],
