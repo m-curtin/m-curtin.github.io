@@ -37,6 +37,7 @@ module.exports = {
                 ['JS_base', 'JS基础']
             ],
             '/JSalgorithm/': [
+                ['regExr', '正则'],
                 ['array', '数组'],
                 ['string', '字符串']
             ],
