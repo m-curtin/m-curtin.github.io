@@ -185,3 +185,30 @@ JavaScript获得了一些工具来帮助解决这种问题。通过 Web workers 
 ### 1. 概念
 
 >Promise 对象用于表示一个异步操作的最终完成 (或失败)及其结果值。
+
+## 07: async与await
+
+## 08: genearte
+
+
+## 09: JS内置对象键值对
+
+### 1. Set
+
+> 概念：Set 对象允许你存储任何类型的唯一值，无论是原始值或者是对象引用。Set对象是值的集合，你可以按照插入的顺序迭代它的元素。 Set中的元素只会出现一次，即 Set 中的元素是唯一的。
+
+has、add 时间复杂度：O(1)
+```js
+var containsDuplicate = function(nums) {
+    const set = new Set();
+    for (const x of nums) {
+        if (set.has(x)) {
+            return true;
+        }
+        set.add(x);
+    }
+    return false;
+};
+```
+
+### 2. Map
