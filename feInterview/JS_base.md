@@ -4,7 +4,7 @@
 JS 中，存在着 7 种原始类型，分别是：<br>
 `boolean` `null` `undefined` `number` `string` `bigint` `symbol`
 
-引用数据类型 6 种: 
+引用数据类型 6 种:
 对象Object（ `普通对象-Object`，`数组对象-Array`，`正则对象-RegExp`，`日期对象-Date`，`数学函数-Math`，`函数对象-Function`）
 
 ### 2. null是对象吗？
@@ -23,14 +23,14 @@ JS 的最初版本中，使用 32 位系统，为了性能考虑使用低位存�
 let sy = Symbol("lkt");
 console.log(sy);   // Symbol(KK)
 typeof(sy);        // "symbol"
- 
+
 // 相同参数 Symbol() 返回的值不相等
-let sy1 = Symbol("lkt"); 
+let sy1 = Symbol("lkt");
 sy === sy1;       // false
 ```
 
 
-## 02：谈谈对闭包的理解？
+## 03：谈谈对闭包的理解？
 ### 1. 什么是闭包？
 红宝书上的定义：`闭包是有权访问另外一个函数作用域中的变量的函数`。
 
@@ -69,3 +69,119 @@ function f1() {
 闭包产生的本质：`当前环境中存在指向父级作用域的引用`
 
 
+## 04: 异步
+
+![image.png](https://s2.loli.net/2021/12/13/S5mL8Iqi9hsBQDJ.png)
+
+### 1. 同步代码运行背景？
+通常程序都是`顺序执行`，如果一个函数依赖于另一个函数的结果，它只能等待那个函数结束才能继续执行。
+从用户的角度来说，整个程序才算运行完毕。
+
+### 2. 代码阻塞
+
+浏览器里面的一个Web应用进行`密集运算还没有把控制权返回给浏览器的时候`，整个浏览器就像冻僵了一样，这叫做`阻塞`。
+
+这时候浏览器无法继续处理用户的输入并执行其他任务，直到web应用交回处理器的控制。
+
+```js
+const btn = document.querySelector('button');
+btn.addEventListener('click', () => {
+  let myDate;
+  for(let i = 0; i < 10000000; i++) {
+    let date = new Date();
+    myDate = date
+  }
+
+  console.log(myDate);
+
+  let pElem = document.createElement('p');
+  pElem.textContent = 'This is a newly-added paragraph.';
+  document.body.appendChild(pElem);
+});
+```
+
+> 你会注意到，直到日期的运算结束，最后一个日期在console上显示出来，段落才会出现在网页上。代码按照源代码的顺序执行，`只有前面的代码结束运行，后面的代码才会执行。`
+
+
+为什么是这样? 答案是：JavaScript一般来说是单线程的（single threaded）。
+
+此时这个复杂计算占用主线程资源。
+
+
+### 3. 线程
+一个线程是一个基本的处理过程，程序用它来完成任务。每个线程一次只能执行一个任务:
+
+> Task A --> Task B --> Task C
+
+只有前面的结束了，后面的才能开始。
+
+现在的计算机大都有多个内核（core），因此可以同时执行多个任务。支持多线程的编程语言可以使用计算机的多个内核，同时完成多个任务:
+
+> Thread 1: Task A --> Task B
+>
+> Thread 2: Task C --> Task D
+
+
+### 4. JavaScript 是单线程
+
+JavaScript 传统上是单线程的。即使有多个内核，也只能在单一线程上运行多个任务，此线程称为主线程（main thread）。
+
+JavaScript获得了一些工具来帮助解决这种问题。通过 Web workers 可以把一些任务交给一个名为worker的单独的线程，这样就可以同时运行多个JavaScript代码块。一般`用一个worker来运行一个耗时的任务`，主线程就可以处理用户的交互（避免了阻塞）。
+
+>Main thread: Task A --> Task C
+>
+> Worker thread: Expensive task B
+
+### 5. 异步代码
+
+我们看下面的场景：比如说Task A 正在从服务器上获取一个图片之类的资源，Task B 准备在图片上加一个滤镜。如果开始运行Task A 后立即尝试运行Task B，你将会得到一个错误，因为图像还没有获取到。
+
+> Main thread: Task A --> Task B --> |Task D|
+>
+> Worker thread: Task C -----------> |      |
+
+在这种情况下，假设Task D 要同时使用 Task B 和Task C的结果，如果我们能保证这两个结果同时提供，程序可能正常运行，但是这不太可能。如果Task D 尝试在其中一个结果尚未可用的情况下就运行，程序就会抛出一个错误。
+
+
+为了解决这些问题，浏览器允许我们异步运行某些操作。像Promises 这样的功能就允许让一些操作运行 (比如：从服务器上获取图片)，然后等待直到结果返回，再运行其他的操作。
+
+> Main thread: `Task A                   Task B`
+>
+>  Promise:      `|__async operation__|`
+
+由于操作发生在其他地方，因此在处理异步操作的时候，主线程不会被阻塞。
+
+### 6. 总结
+
+为了让程序在一个时间内做更多的事情。当使用更新更强大的API时，更多的情况使用异步编程是唯一的途径。
+
+最基本的形式中，JavaScript是一种`同步的、阻塞的、单线程`的语言，在这种语言中，一次只能执行一个操作。但web浏览器定义了函数和API，允许我们当某些事件发生时不是按照同步方式，而是`异步地调用函数`(比如，`时间的推移，用户通过鼠标的交互，或者获取网络数据`)。这意味着您的代码可以同时做几件事情，而不需要停止或阻塞主线程。
+
+异步还是同步执行代码，取决于我们要做什么。
+
+* 有时候希望事情能够立即加载并发生。例如，当将一些用户定义的样式应用到一个页面时，您希望这些样式能够尽快被应用。
+
+* 但是，如果我们正在运行一个需要时间的操作，比如查询数据库并使用结果填充模板，那么最好将该操作从主线程中移开使用异步完成任*务。
+
+
+## 05: JavaScript: 超时和间隔执行
+
+### 1. 概念
+
+
+* setTimeout()
+  * 在指定的时间后执行一段代码.
+* setInterval()
+  *  以固定的时间间隔，重复运行一段代码.
+* requestAnimationFrame()
+  * setInterval()的现代版本;在浏览器下一次重新绘制显示之前执行指定的代码块，从而允许动画在适当的帧率下运行，而不管它在什么环境中运行.
+
+### 2.
+
+
+
+## 06: Promise的理解
+
+### 1. 概念
+
+>Promise 对象用于表示一个异步操作的最终完成 (或失败)及其结果值。
