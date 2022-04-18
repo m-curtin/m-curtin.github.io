@@ -216,6 +216,37 @@ function App(props) {
 * 切换到GUI渲染线程刷新页面
 * 再回到主线程并从上个断电继续执行任务
 
+## diff策略
+
+> React中 Virtual DOM 与 diff 的完美结合，其高效的diff算法，让开发者无需关心 Virtual DOM 背后的工作原理， React diff帮我们计算出 Virtual DOM 中真正变化的部分，并只针对该部分进行实际 DOM 操作，而非渲染整个页面。从而保证每次更新页面的高效渲染。
+
+### 传统diff 算法
+
+* 通过循环递归对节点进行依次对比，时间复杂度高达O(n^3)，n为树中节点总数
+* 1000个节点，那就是10亿次比较
+
+
+### React diff策略
+
+* 时间复杂度 O(n^3) 转换成 O(n) 复杂度
+* Web UI 中 DOM 节点跨层级的移动操作少，忽略不计
+* 拥有相同类的两个组件回生成相似的树形结构，拥有不同类别的两个组件会生成不同的树形结构
+* 同一层级子节点通过唯一id区分
+
+### 总结
+
+- React 通过制定大胆的 diff 策略，将 O(n3) 复杂度的问题转换成 O(n) 复杂度的问题；
+
+- React 通过分层求异的策略，对 tree diff 进行算法优化；
+
+- React 通过相同类生成相似树形结构，不同类生成不同树形结构的策略，对 component diff 进行算法优化；
+
+- React 通过设置唯一key的策略，对 element diff 进行算法优化；`（不设置key可能不更新）`
+
+- 建议，在开发组件时，保持稳定的 DOM 结构会有助于性能的提升；
+
+- 建议，在开发过程中，尽量减少类似将最后一个节点移动到列表首部的操作，当节点数量过大或更新操作过于频繁时，在一定程度上会影响 React 的渲染性能。
+
 
 ## Hook
 
@@ -279,4 +310,115 @@ function Example() {
 }
 ```
 
+useState的参数也可以是一个函数。
+
+```js
+const [state, setState] = useState(() => {
+    return 0
+});
+```
+
 ### useEffect
+
+```js
+import React, {
+    useState,
+    useEffect,
+} from 'react';
+
+function App() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    document.title = `You clicked ${count} times`;
+  });
+
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
+    </div>
+  );
+}
+```
+
+```js
+useEffect(() => {}, []) // 只在挂载时执行
+useEffect(() => {}, [count]) // 只在挂载和count改变时执行
+useEffect(() => {}) // 在挂载和数据更新时执行
+```
+
+
+`useEffect`可以返回一个函数来清除副作用
+
+```js
+useEffect(() => {
+    // 运行副作用
+    ChatAPI.subscribe()
+    // 清除副作用
+    return () => {
+        ChatAPI.unsubscribe()
+    }
+})
+```
+
+
+组件挂载时，运行副作用（effect）；组件更新时，先清除上一个effect，再运行下一个effect；组件卸载时，清除最后一个effect。
+
+```js
+function FriendStatus(props) {
+  // ...
+  useEffect(() => {
+    // ...
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+  });
+```
+
+
+```js
+// Mount with { friend: { id: 100 } } props
+ChatAPI.subscribeToFriendStatus(100, handleStatusChange);     // 运行第一个 effect
+
+// Update with { friend: { id: 200 } } props
+ChatAPI.unsubscribeFromFriendStatus(100, handleStatusChange); // 清除上一个 effect
+ChatAPI.subscribeToFriendStatus(200, handleStatusChange);     // 运行下一个 effect
+
+// Update with { friend: { id: 300 } } props
+ChatAPI.unsubscribeFromFriendStatus(200, handleStatusChange); // 清除上一个 effect
+ChatAPI.subscribeToFriendStatus(300, handleStatusChange);     // 运行下一个 effect
+
+// Unmount
+ChatAPI.unsubscribeFromFriendStatus(300, handleStatusChange); // 清除最后一个 effect
+```
+
+### useRef
+
+在函数组件中引入`ref`
+
+```js
+import React, { useRef } from 'react'
+
+function App(props) {
+    let refs = useRef(null)
+    return (
+    	<input ref={refs}>
+    )
+}
+```
+
+### useMemo
+
+类似计算属性，根据依赖的变量缓存计算的结果。
+
+```js
+const revertMsg = useMemo(() => msg.split('').reverse().join(''), [msg])
+
+```
+
+### useCallback
+
