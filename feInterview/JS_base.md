@@ -212,3 +212,65 @@ var containsDuplicate = function(nums) {
 ```
 
 ### 2. Map
+
+
+## 10：原型链
+
+### 1. 概念
+
+* 原型链本质是链表（链表本质通过.next相互连接）
+* 原型链上节点是各种原型对象，比如：
+  * Fuction.prototype、 Object.prototype ...
+* 实例对象（object）都有一个私有属性（ `__proto__` ）指向它的原型对象（`prototype`）
+![](https://raw.githubusercontent.com/Nonentityboy/PicGoToGitHub/study_note_blog/20220502192239.png)
+
+> 如果 A 验证原型链能找到B.prototype，那么 A instanceof B为 true。
+
+
+```js
+const obj = {};
+const func = () => {};
+const arr = [];
+
+obj.__proto__ === Object.prototype // true
+obj instanceof Object   // true
+
+func.__proto__ === Fuction.prototype // true
+func.__proto__.__proto__ === Object.prototype // true
+func instanceof Fuction   // true
+func instanceof Object   // true
+
+arr.__proto__ === Array.prototype // true
+arr.__proto__.__proto__ === Object.prototype // true
+arr instanceof Array   // true
+arr instanceof Object   // true
+```
+
+> 如果 A 对象没找到 x 属性，那么会沿着原型链找 x 属性。
+
+```js
+const obj = {};
+Object.prototype.x = 'x';
+// obj.x => x
+```
+
+
+### 2. instanceof 原理与实现
+
+
+instanceof 实现：
+```js
+const newInstanceOf = (A, B) => {
+    let p = A;
+    while (p) {
+        if (p === B.prototype) {
+            return true;
+        }
+        p = p.__proto__; // 遍历原型链
+    }
+    return false;
+};
+```
+
+
+![](https://raw.githubusercontent.com/Nonentityboy/PicGoToGitHub/study_note_blog/20220502202437.png)

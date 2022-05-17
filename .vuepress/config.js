@@ -18,12 +18,10 @@ module.exports = {
             },
             {
                 text: '计算机基础',
-                items: [
-                    { text: '计算机网络', link: '/csInterview/' },
-                    { text: '数据结构', link: '/JSalgorithm/' },
-                ]
+                link: '/csInterview/'
             },
-            { text: 'JS Coding', link: '/JSachieve/' },
+            { text: '数据结构与算法', link: '/JSalgorithm/' },
+            { text: 'JS 常用实现', link: '/JSachieve/' },
             {
                 text: '生产工具',
                 link: '/Tools/'
@@ -39,7 +37,9 @@ module.exports = {
             '/JSalgorithm/': [
                 ['regExr', '正则'],
                 ['array', '数组'],
-                ['string', '字符串']
+                ['string', '字符串'],
+                ['bsTree', '二叉树'],
+                ['linkedList', '链表'],
             ],
             '/Tools/': [
                 ['git', 'Git'],
@@ -49,8 +49,7 @@ module.exports = {
                 ['react', 'React']
             ],
             '/JSachieve/': [
-                ['array', '数组'],
-                ['string', '字符串']
+                ['normalCode', '常见实现'],
             ],
             '/browser/': [
                 ['chrome', 'Chrome']
