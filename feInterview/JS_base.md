@@ -197,7 +197,10 @@ promise对象仅有三种状态
 ### 3. 特点
 
 - 对象的状态不受外界影响，只有异步操作的结果，可以决定当前是哪一种状态
-- 一旦状态改变（从pending变为fulfilled和从pending变为rejected），就不会再变，任何时候都可以得到这个结果
+- 一旦状态改变（从pending变为fulfilled和从pending变为rejected），就不会再变，任何时候都可以得到这个结果。
+
+
+
 
 ## 07: async与await
 
