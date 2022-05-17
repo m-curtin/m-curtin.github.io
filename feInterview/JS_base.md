@@ -184,7 +184,20 @@ JavaScript获得了一些工具来帮助解决这种问题。通过 Web workers 
 
 ### 1. 概念
 
->Promise 对象用于表示一个异步操作的最终完成 (或失败)及其结果值。
+> Promise 对象用于表示一个异步操作的最终完成 (或失败)及其结果值。
+
+### 2. 状态
+
+promise对象仅有三种状态
+
+- pending（进行中）
+- fulfilled（已成功）
+- rejected（已失败）
+
+### 3. 特点
+
+- 对象的状态不受外界影响，只有异步操作的结果，可以决定当前是哪一种状态
+- 一旦状态改变（从pending变为fulfilled和从pending变为rejected），就不会再变，任何时候都可以得到这个结果
 
 ## 07: async与await
 
@@ -218,7 +231,11 @@ var containsDuplicate = function(nums) {
 
 ### 1. 概念
 
-* 原型链本质是链表（链表本质通过.next相互连接）
+JavaScript 常被描述为一种基于原型的语言——每个对象拥有一个原型对象 `prototype`。
+
+当试图访问一个对象的属性时，它不仅仅在该对象上搜寻，还会搜寻该对象的原型，以及该对象的原型的原型，依次层层向上搜索，直到找到一个名字匹配的属性或到达原型链的末尾。
+
+* 原型链本质是链表（链表本质通过.next相互连接，原型链通过`__proto__`连接）
 * 原型链上节点是各种原型对象，比如：
   * Fuction.prototype、 Object.prototype ...
 * 实例对象（object）都有一个私有属性（ `__proto__` ）指向它的原型对象（`prototype`）
