@@ -422,3 +422,150 @@ const revertMsg = useMemo(() => msg.split('').reverse().join(''), [msg])
 
 ### useCallback
 
+
+## 状态 setState()
+
+类组件中通过`this.setState`修改数据。
+
+**合成事件**和**组件的生命周期**中`setState`是异步的；而在**原生事件**和**定时器**中`setState`是同步的。
+
+React内部维护了一个标识：`isBatchingUpdates`。在**合成事件**和**组件的生命周期**中，该值为`true`，那么`setState`会被缓存进队列，最后才批量更新；而在**原生事件**和**定时器**中，该值为`false`，调用`setState`时会直接同步更新。
+
+
+## 高阶组件
+
+高阶组件是参数为组件，返回值为新组件的函数。
+
+## hook
+
+**业务发展导致组件日益庞大**，最外层的代码集中维护许多state状态（像`生命周期`内部），导致页面引入越来越多毫无关联的模块，代码的可读性大大降低，有时候因为`多个生命周期`里面有大量`不相关的逻辑`，这样杂乱的代码容易引起bug。
+
+为了解决更深层次的问题：React 需要为共享状态逻辑提供更好的途径`hook`。
+
+### useContext
+
+通过使用`useContext`，我们能够在组件内部获取到外层`<MyContext.Provider value={value}>`传递下来的值，免去了一层一层传`props`的烦恼。
+
+> 但需要注意的是，一旦我们组件使用了`useContext()`，那么一旦`Provider`传递的`value`地址发生了改变，就会触发我们组件的重新渲染。
+
+## React 16.8
+
+> react核心思想就是，将一个页面拆成一堆独立的，可复用的组件，并且用自上而下的单向数据流的形式将这些组件串联起来。
+
+不编写 class 的情况下使用状态(state)和其他 React 特性。 可以构建自己的 Hooks, 跨组件共享可重用的有状态逻辑。
+
+### redux
+
+redux参考链接：<https://juejin.cn/post/6844903846666321934#heading-7>
+
+1. props意味着父级分发下来的属性
+2. state意味着组件内部可以自行管理的状态，并且整个React没有数据向上回溯的能力，这就是react的单向数据流
+
+> redux是的诞生是为了给 React 应用提供「可预测化的状态管理」机制。Redux会将整个应用状态(其实也就是数据)存储到到一个地方，称为store 这个store里面保存一棵状态树(state tree) 组件改变state的唯一方法是通过调用store的dispatch方法，触发一个action，这个action被对应的reducer处理，于是state完成更新组件可以派发(dispatch)行为(action)给store,而不是直接通知其它组件,其它组件可以通过订阅store中的状态(state)来刷新自己的视图
+
+#### 使用步骤
+
+创建reducer
+
+可以使用单独的一个reducer,也可以将多个reducer合并为一个reducer，即：combineReducers()
+action发出命令后将state放入reucer加工函数中，返回新的state,对state进行加工处理
+
+创建action
+
+用户是接触不到state的，只能有view触发，所以，这个action可以理解为指令，需要发出多少动作就有多少指令
+action是一个对象，必须有一个叫type的参数，定义action类型
+
+创建的store，使用createStore方法
+
+store 可以理解为有多个加工机器的总工厂
+提供subscribe，dispatch，getState这些方法。
+
+```js
+npm install redux -S // 安装
+
+import { createStore } from 'redux' // 引入
+
+const reducer = (state = {count: 0}, action) => {----------> ⑴
+  switch (action.type){
+    case 'INCREASE': return {count: state.count + 1};
+    case 'DECREASE': return {count: state.count - 1};
+    default: return state;
+  }
+}
+
+const actions = {---------->⑵
+  increase: () => ({type: 'INCREASE'}),
+  decrease: () => ({type: 'DECREASE'})
+}
+
+const store = createStore(reducer);---------->⑶
+
+store.subscribe(() =>
+  console.log(store.getState())
+);
+
+store.dispatch(actions.increase()) // {count: 1}
+store.dispatch(actions.increase()) // {count: 2}
+store.dispatch(actions.increase()) // {count: 3}
+```
+
+![](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e77d7f76ad6b4602af7fe428da0730d5~tplv-k3u1fbpfcp-zoom-1.image)
+
+### Mobx
+
+### react-redux
+
+把store直接集成到React应用的顶层props里面，只要各个子组件能访问到顶层props就行了
+
+```js
+<顶层组件 store={store}>
+  <App />
+</顶层组件>
+```
+
+Redux 官方提供的 React 绑定库。 具有高效且灵活的特性。
+
+### React Redux 将组件区分为 容器组件 和 UI 组件
+
+1. 前者会处理逻辑
+2. 后者只负责显示和交互，内部不处理逻辑，状态完全由外部掌控
+
+> Provider
+
+> connect
+
+### mapStateToProps
+
+把state映射到props中去 ,其实也就是把`Redux中的数据映射到React中的props`中去
+
+```js
+const mapStateToProps = (state) => {
+    return {
+    // prop : state.xxx  | 意思是将state中的某个数据映射到props中
+        foo: state.bar
+    }
+}
+
+```
+
+## Fiber架构
+
+React在V16版本推出了Fiber架构，在弄清楚什么是Fiber之前，我们应该先了解为什么需要Fiber。
+
+- 首先，浏览器是多线程的，这些线程包括`JS引擎线程（主线程）`，以及GUI渲染线程，定时器线程，事件线程等工作线程。
+
+- `JS引擎线程`和`GUI渲染线程`是互斥的。又因为绝大多数的浏览器页面的刷新频率取决于`显示器的刷新频率`，即每16.6毫秒就会通过GUI渲染引擎刷新一次。
+
+- 所以，如果`JS引擎线程`一次性执行了一个长时间（大于16.6毫秒）的同步任务，就可能出现掉帧的情况，影响用户的体验。
+
+- Fiber的思路是将`原本耗时较长的同步任务`分片为多个任务单元，执行完一个任务单元后可以保存当前的状态，切换到GUI渲染线程去刷新页面，接下来再回到主线程并从上个断点继续执行任务。
+
+- 将原本耗时很长的同步任务分成多个耗时短的分片，从而实现了浏览器中互斥的`JS引擎线程（主线程）`与`GUI渲染线程`之间的调度。
+
+## Diff策略
+
+- 1. Web UI 中 DOM 节点跨层级的移动操作特别少，可以忽略不计。
+- 2. 拥有相同类的两个组件将会生成相似的树形结构，拥有不同类的两个组件将会生成不同的树形结构。
+- 3. 对于同一层级的一组子节点，它们可以通过唯一 key(id) 进行区分。
+
+
