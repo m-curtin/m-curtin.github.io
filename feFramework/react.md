@@ -200,9 +200,13 @@ function App(props) {
 
 ### 为什么需要 Fiber
 
-* 浏览器是多线程，包括JS引擎线程、GUI渲染线程、定时器线程、事件线程等工作线程。
-* JS引擎线程和GUI渲染线程互斥，大多数的浏览器页面的刷新频率取决于显示器的刷新频率，即每16.6毫秒就会通过GUI渲染引擎刷新一次
-* JS引擎线程一次性执行了一个长时间的同步任务，可能出现掉帧影响用户体验的情况
+React在V16版本推出了Fiber架构，在弄清楚什么是Fiber之前，我们应该先了解为什么需要Fiber。
+
+- 首先，浏览器是多线程的，这些线程包括`JS引擎线程（主线程）`，以及GUI渲染线程，定时器线程，事件线程等工作线程。
+
+- `JS引擎线程`和`GUI渲染线程`是互斥的。又因为绝大多数的浏览器页面的刷新频率取决于`显示器的刷新频率`，即每16.6毫秒就会通过GUI渲染引擎刷新一次。
+
+- 所以，如果`JS引擎线程`一次性执行了一个长时间（大于16.6毫秒）的同步任务，就可能出现掉帧的情况，影响用户的体验。
 
 
 ### 旧版本React不足之处
@@ -215,6 +219,40 @@ function App(props) {
 * 执行完一个任务单元后可保存当前状态
 * 切换到GUI渲染线程刷新页面
 * 再回到主线程并从上个断电继续执行任务
+* 将原本耗时很长的同步任务分成多个耗时短的分片，从而实现了浏览器中互斥的`JS引擎线程（主线程）`与`GUI渲染线程`之间的调度
+* Fiber的思路是将`原本耗时较长的同步任务`分片为多个任务单元，执行完一个任务单元后可以保存当前的状态，切换到GUI渲染线程去刷新页面，接下来再回到主线程并从上个断点继续执行任务
+
+## 虚拟DOM
+
+### 概念
+
+虚拟DOM可以看做一棵模拟了DOM树的JavaScript对象树。
+
+```JS
+let element = {
+    element: 'ul',
+    props: {
+        id: "ulist"
+    },
+    children: [
+        {
+            element: 'li',
+            props: { id:"first" },
+            children: ['这是第一个List元素']
+        },
+        {
+            element: 'li',
+            props: { id:"second" },
+            children: ['这是第二个List元素']
+        }
+    ]
+}
+```
+
+- 传统的 Web 开发，我们往往会把数据的变化实时地更新到用户界面中，于是每次数据的微小变动都会引起 DOM 树的重新渲染。
+- 虚拟DOM的目的是将所有操作累加起来，统计计算出所有的变化后，统一更新一次DOM。
+
+![](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/91081763231441a4affb2bc7c0b61134~tplv-k3u1fbpfcp-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ## diff策略
 
@@ -225,13 +263,26 @@ function App(props) {
 * 通过循环递归对节点进行依次对比，时间复杂度高达O(n^3)，n为树中节点总数
 * 1000个节点，那就是10亿次比较
 
-
 ### React diff策略
 
 * 时间复杂度 O(n^3) 转换成 O(n) 复杂度
 * Web UI 中 DOM 节点跨层级的移动操作少，忽略不计
 * 拥有相同类的两个组件回生成相似的树形结构，拥有不同类别的两个组件会生成不同的树形结构
 * 同一层级子节点通过唯一id区分
+
+
+### diff 算法原理
+
+Node节点的更新，虚拟DOM会比较两棵DOM树的区别，保证最小化的DOM操作，使得执行效率得到保证。
+
+计算两棵树的常规算法是`O(n^3)`级别，所以需要优化`深度遍历(DFS)`的算法。React diff算法的时间复杂度为O(n)。
+
+![遍历算法](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/6c47307fed384e4e8a149f39fb4fe5ea~tplv-k3u1fbpfcp-zoom-1.image)
+
+### React diff 算法
+
+<https://juejin.cn/post/6844904165026562056#heading-3>
+
 
 ### 总结
 
@@ -272,7 +323,7 @@ function Example() {
 
 ### 为什么有 hook
 
-> Hook 解决了我们五年来编写和维护成千上万的组件时遇到的各种各样看起来不相关的问题。无论你正在学习 React，或每天使用，或者更愿尝试另一个和 React 有相似组件模型的框架，你都可能对这些问题似曾相识。
+> React官网：Hook 解决了我们五年来编写和维护成千上万的组件时遇到的各种各样看起来不相关的问题。无论你正在学习 React，或每天使用，或者更愿尝试另一个和 React 有相似组件模型的框架，你都可能对这些问题似曾相识。
 
 
 * 组件之间复用状态逻辑很难
@@ -288,6 +339,11 @@ function Example() {
 
 为了解决这个问题，`Hook 将组件中相互关联的部分拆分成更小的函数（比如设置订阅或请求数据）`，而并非强制按照生命周期划分。你还可以使用 reducer 来管理组件的内部状态，使其更加可预测。
 
+### 解决问题
+
+**业务发展导致组件日益庞大**，最外层的代码集中维护许多state状态（像`生命周期`内部），导致页面引入越来越多毫无关联的模块，代码的可读性大大降低，有时候因为`多个生命周期`里面有大量`不相关的逻辑`，这样杂乱的代码容易引起bug。
+
+为了解决更深层次的问题：React 需要为共享状态逻辑提供更好的途径`hook`。
 
 ### useState
 
@@ -423,7 +479,14 @@ const revertMsg = useMemo(() => msg.split('').reverse().join(''), [msg])
 ### useCallback
 
 
-## 状态 setState()
+
+### useContext
+
+通过使用`useContext`，我们能够在组件内部获取到外层`<MyContext.Provider value={value}>`传递下来的值，免去了一层一层传`props`的烦恼。
+
+> 但需要注意的是，一旦我们组件使用了`useContext()`，那么一旦`Provider`传递的`value`地址发生了改变，就会触发我们组件的重新渲染。
+
+## setState 方法原理
 
 类组件中通过`this.setState`修改数据。
 
@@ -436,17 +499,7 @@ React内部维护了一个标识：`isBatchingUpdates`。在**合成事件**和*
 
 高阶组件是参数为组件，返回值为新组件的函数。
 
-## hook
 
-**业务发展导致组件日益庞大**，最外层的代码集中维护许多state状态（像`生命周期`内部），导致页面引入越来越多毫无关联的模块，代码的可读性大大降低，有时候因为`多个生命周期`里面有大量`不相关的逻辑`，这样杂乱的代码容易引起bug。
-
-为了解决更深层次的问题：React 需要为共享状态逻辑提供更好的途径`hook`。
-
-### useContext
-
-通过使用`useContext`，我们能够在组件内部获取到外层`<MyContext.Provider value={value}>`传递下来的值，免去了一层一层传`props`的烦恼。
-
-> 但需要注意的是，一旦我们组件使用了`useContext()`，那么一旦`Provider`传递的`value`地址发生了改变，就会触发我们组件的重新渲染。
 
 ## React 16.8
 
@@ -548,24 +601,167 @@ const mapStateToProps = (state) => {
 
 ```
 
-## Fiber架构
 
-React在V16版本推出了Fiber架构，在弄清楚什么是Fiber之前，我们应该先了解为什么需要Fiber。
 
-- 首先，浏览器是多线程的，这些线程包括`JS引擎线程（主线程）`，以及GUI渲染线程，定时器线程，事件线程等工作线程。
 
-- `JS引擎线程`和`GUI渲染线程`是互斥的。又因为绝大多数的浏览器页面的刷新频率取决于`显示器的刷新频率`，即每16.6毫秒就会通过GUI渲染引擎刷新一次。
+## 合成事件
 
-- 所以，如果`JS引擎线程`一次性执行了一个长时间（大于16.6毫秒）的同步任务，就可能出现掉帧的情况，影响用户的体验。
+参考链接：
+<https://segmentfault.com/a/1190000038251163>
 
-- Fiber的思路是将`原本耗时较长的同步任务`分片为多个任务单元，执行完一个任务单元后可以保存当前的状态，切换到GUI渲染线程去刷新页面，接下来再回到主线程并从上个断点继续执行任务。
+<https://segmentfault.com/a/1190000039108951>
 
-- 将原本耗时很长的同步任务分成多个耗时短的分片，从而实现了浏览器中互斥的`JS引擎线程（主线程）`与`GUI渲染线程`之间的调度。
+[react 17 移除事件池](https://zh-hans.reactjs.org/blog/2020/08/10/react-v17-rc.html)
 
-## Diff策略
+### 概念
 
-- 1. Web UI 中 DOM 节点跨层级的移动操作特别少，可以忽略不计。
-- 2. 拥有相同类的两个组件将会生成相似的树形结构，拥有不同类的两个组件将会生成不同的树形结构。
-- 3. 对于同一层级的一组子节点，它们可以通过唯一 key(id) 进行区分。
+> 理解：React在所有原生事件上做了层接口封装。
 
+- React 合成事件（SyntheticEvent）是 React 模拟原生 DOM 事件所有能力的一个事件对象，即`浏览器原生事件的跨浏览器包装器`。
+- 根据 W3C 规范 来定义合成事件，兼容所有浏览器，拥有与浏览器原生事件相同的接口。
+
+React 中，所有事件都是合成的，不是原生 DOM 事件，但可以通过 e.nativeEvent 属性获取 DOM 事件。
+
+```JS
+const handleClick = (e) => console.log(e.nativeEvent);;
+const button = <button onClick={handleClick}>Leo 按钮</button>
+```
+
+### 目的
+
+- 浏览器兼容，实现更好的跨平台,顶层事件代理机制，能够保证冒泡一致性，可以跨浏览器执行。React 提供的合成事件用来抹平不同浏览器事件对象之间的差异，将不同平台事件模拟合成事件。
+- 事件对象可能会被频繁创建和回收， React 引入`事件池`，事件池中获取或释放事件对象。即 `React 事件对象不会被释放掉`，而是存放进一个数组中，当事件触发，就从这个数组中弹出，`避免频繁地去创建和销毁(垃圾回收)`。
+
+源码参考:
+<https://github.com/facebook/react/blob/75ab53b9e1de662121e68dabb010655943d28d11/packages/events/SyntheticEvent.js#L62>
+
+### 合成事件与原生事件区别
+
+- 事件名称命名方式不同
+
+```js
+// 原生事件绑定方式
+<button onclick="handleClick()">Leo 按钮命名</button>
+
+// React 合成事件绑定方式
+const button = <button onClick={handleClick}>Leo 按钮命名</button>
+
+// 原生事件 事件处理函数写法
+<button onclick="handleClick()">Leo 按钮命名</button>
+
+// React 合成事件 事件处理函数写法
+const button = <button onClick={handleClick}>Leo 按钮命名</button>
+```
+
+- 阻止默认行为方式不同
+  - 原生事件中通过返回false 来阻止默认行为
+  - react中需要使用preventDefault() 来阻止
+
+```JS
+// 原生事件阻止默认行为方式
+<a href="https://www.pingan8787.com"
+  onclick="console.log('Leo 阻止原生事件~'); return false"
+>
+  Leo 阻止原生事件
+</a>
+
+// React 事件阻止默认行为方式
+const handleClick = e => {
+  e.preventDefault();
+  console.log('Leo 阻止原生事件~');
+}
+const clickElement = <a href="https://www.pingan8787.com" onClick={handleClick}>
+  Leo 阻止原生事件
+</a>
+```
+
+### React 事件与原生事件执行顺序
+
+> React 中，“合成事件”会以事件委托（Event Delegation）方式绑定在组件最上层，并在组件卸载（unmount）阶段自动销毁绑定的事件。这里我们手写一个简单示例来观察 React 事件和原生事件的执行顺序。
+
+```JS
+class App extends React.Component<any, any> {
+  parentRef: any;
+  childRef: any;
+  constructor(props: any) {
+    super(props);
+    this.parentRef = React.createRef();
+    this.childRef = React.createRef();
+  }
+  componentDidMount() {
+    console.log("React componentDidMount！");
+    this.parentRef.current?.addEventListener("click", () => {
+      console.log("原生事件：父元素 DOM 事件监听！");
+    });
+    this.childRef.current?.addEventListener("click", () => {
+      console.log("原生事件：子元素 DOM 事件监听！");
+    });
+    document.addEventListener("click", (e) => {
+      console.log("原生事件：document DOM 事件监听！");
+    });
+  }
+  parentClickFun = () => {
+    console.log("React 事件：父元素事件监听！");
+  };
+  childClickFun = () => {
+    console.log("React 事件：子元素事件监听！");
+  };
+  render() {
+    return (
+      <div ref={this.parentRef} onClick={this.parentClickFun}>
+        <div ref={this.childRef} onClick={this.childClickFun}>
+          分析事件执行顺序
+        </div>
+      </div>
+    );
+  }
+}
+export default App;
+
+// 原生事件：子元素 DOM 事件监听！
+// 原生事件：父元素 DOM 事件监听！
+// React 事件：子元素事件监听！
+// React 事件：父元素事件监听！
+// 原生事件：document DOM 事件监听！
+```
+
+通过上面流程，我们可以理解：
+
+- React 所有事件都挂载在 document 对象上；
+- 当真实 DOM 元素触发事件，会冒泡到 document 对象后，再处理 React 事件；
+- 所以会先执行原生事件，然后处理 React 事件；
+- 最后真正执行 document 上挂载的事件。
+
+![](https://segmentfault.com/img/remote/1460000038251169)
+
+## React 的事件绑定为什么要bind this
+
+参考链接：
+<https://juejin.cn/post/6844903633067180039>
+<https://segmentfault.com/a/1190000038167700>
+<https://github.com/Vibing/blog/issues/13>
+
+JSX语法实际上是createElement的语法糖
+
+```JS
+<div>Hello, { this.props.name }</div>
+// 等价于
+React.createElement('div', null, `Hello,${this.props.name}` )
+
+// createElement伪代码实现
+function createElement(dom, params) {
+  var domObj = document.createElement(dom);
+  domObj.onclick = params.onclick;
+  domObj.innerHTML = params.conent;
+  return domObj
+}
+```
+
+- button被点击时，会由React作为中介调用回调函数，此时的`this指向丢失，就指向了window`
+- bind this原理：改变原函数 this 指向，即绑定 `this`，返回原函数的拷贝
+
+### 为什么箭头函数方式不需要bind this
+
+- 箭头函数内没有this，默认用父级作用域的this
+- 当使用new关键字时，this指向新对象，同时箭头函数中的this也被赋值为了新对象且永远不会更改指向
 

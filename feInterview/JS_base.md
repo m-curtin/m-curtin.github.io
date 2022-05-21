@@ -68,6 +68,12 @@ function f1() {
 
 闭包产生的本质：`当前环境中存在指向父级作用域的引用`
 
+### 3. 用途
+
+- 可以读取函数内部的变量延长作用域，这些变量的值始终保持在内存中
+- import ，模块化实际产生了一个闭包
+- react 事件函数，return出一个组件
+
 
 ## 04: 异步
 
@@ -182,6 +188,8 @@ JavaScript获得了一些工具来帮助解决这种问题。通过 Web workers 
 
 ## 06: Promise的理解
 
+<https://juejin.cn/post/7064389512729722910>
+
 ### 1. 概念
 
 > Promise 对象用于表示一个异步操作的最终完成 (或失败)及其结果值。
@@ -200,9 +208,131 @@ promise对象仅有三种状态
 - 一旦状态改变（从pending变为fulfilled和从pending变为rejected），就不会再变，任何时候都可以得到这个结果。
 
 
+### 4. Promise 封装请求url
+
+```js
+// 封装请求函数
+
+const request = (url, params) => {
+  return new Promise((resolve, reject) => {
+    // ...do something
+  })
+}
+
+// 使用时
+const handleLogin = () => {
+  request(
+    '/basic/login',
+    {
+      usename: 'sunshine',
+      password: '123456'
+    }
+  ).then(res => {
+    // success do something
+  }).catch(err => {
+    // fail do something
+  })
+}
+```
 
 
 ## 07: async与await
+
+
+### 封装请求url
+
+`Promise`的出现解决了很多问题，但是如果请求多了且有顺序要求的话，难免又会出现`嵌套`的问题，可读性较差，比如：
+
+```js
+const handleLogin = () => {
+  request(
+    '/basic/login',
+    {
+      usename: 'sunshine',
+      password: '123456'
+    }
+  ).then(res => {
+    // 登录成功后获取用户信息
+    request(
+      '/basic/getuserinfo',
+      res.id
+    ).then(info => {
+      this.userInfo = info
+    }).catch()
+  }).catch(err => {
+    // fail do something
+  })
+```
+
+```js
+const handleLogin = async () => {
+  const res = await request('/basic/login', {
+    usename: 'sunshine',
+    password: '123456'
+  })
+  const info = await request('/basic/getuserinfo', {
+    id: res.id
+  })
+  this.userInfo = info
+}
+```
+
+### await-to-js
+
+Promise有catch这个错误回调来保证请求错误后该做什么操作，但是async/await该如何捕获错误呢
+
+有一个库await-to-js已经帮我们做了这件事，我们可以看看它是怎么做的，它的源码只有短短十几行，我们应该读读它的源码，学学它的思想
+
+```js
+/**
+ * @param { Promise } 传进去的请求函数
+ * @param { Object= } errorExt - 拓展错误对象
+ * @return { Promise } 返回一个Promise
+ */
+export function to(
+  promise,
+  errorExt
+) {
+  return promise
+    .then(data => [null, data])
+    .catch(err => {
+      if (errorExt) {
+        const parsedError = Object.assign({}, err, errorExt)
+        return [parsedError, undefined]
+      }
+
+      return [err, undefined]
+    })
+}
+
+export default to
+
+```
+
+### 使用方式
+
+```js
+
+const handleLogin = async () => {
+  const [resErr, res] = await to(request('/basic/login', {
+    usename: 'sunshine',
+    password: '123456'
+  }))
+  if (resErr) {
+    // fail do somthing
+    return
+  }
+  const [userErr, info] = await to(request('/basic/getuserinfo', {
+    id: res.id
+  }))
+  if (userErr) {
+    // fail do somthing
+    return
+  }
+  this.userInfo = info
+}
+
+```
 
 ## 08: genearte
 
@@ -235,6 +365,9 @@ var containsDuplicate = function(nums) {
 ### 1. 概念
 
 JavaScript 常被描述为一种基于原型的语言——每个对象拥有一个原型对象 `prototype`。
+
+* prototype: 显式原型
+* `__proto__`: 隐式原型
 
 当试图访问一个对象的属性时，它不仅仅在该对象上搜寻，还会搜寻该对象的原型，以及该对象的原型的原型，依次层层向上搜索，直到找到一个名字匹配的属性或到达原型链的末尾。
 
@@ -294,3 +427,165 @@ const newInstanceOf = (A, B) => {
 
 
 ![](https://raw.githubusercontent.com/Nonentityboy/PicGoToGitHub/study_note_blog/20220502202437.png)
+
+### 3. 箭头函数
+
+箭头函数不可以使用new实例化，这是因为箭头函数没有prototype也没有自己的this指向并且不可以使用arguments。
+
+## 11：event loop
+
+<https://zhuanlan.zhihu.com/p/33058983>
+
+<https://juejin.cn/post/6844903657264136200#heading-3>
+
+### 前提
+
+JS是非阻塞的单线程语言，JS 最初为了和`浏览器交互`而产生。
+
+> 若 JS 是门多线程语言的话，在多个线程处理DOM就可能会有问题。（例如一个线程增加节点，另一个线程删除节点。）
+
+JS 在执行过程中会产生执行环境，这些环境会被顺序的加入到执行栈，遇到异步的代码，会被挂起并加入到宏任务队列。
+
+> 注意：微任务`先进先出，队列结构`。只有当await语句执行完毕之后，才会把await语句后面的全部代码加入到微任务列表中，记住，是加入`微任务列表`，且按照队列结构执行完成。
+
+### 概念
+
+> JavaScript的执行顺序机制。
+
+> 事件循环的基本规则就是，执行完一个宏任务，再执行微任务队列中的所有微任务，再执行下一个宏任务...如此往复。
+>
+> 因此一个事件循环可以视为一个`宏任务+所有微任务`，另外也可以把执行一个宏任务的阶段，或着执行所有微任务的阶段，称作一个 tick，由此可见一个事件循环由两个 tick组成。无论是对于Node中的 `process.nextTick`还是 Vue中的 `$.nextTick`，理解何为 tick都是很有帮助的。
+
+### 任务类型
+
+微任务（microtask）：process.nextTick(Node) 、Promise.then/catch 、Object.observe(异步地监视一个对象的修改)、MutationObserver(监听当前DOM)
+
+宏任务（macrotask）：script ， setTimeout ，setInterval ，setImmediate(Node) ，I/O ，UI rendering, promise声明
+
+### 执行顺序
+
+1. 先执行当前同步代码，属于宏任务。
+2. 遇到setTimeout等，塞给宏任务队列。（`下一轮宏任务执行`）
+3. 查询当前微任务队列，处理微任务，处理完成，渲染UI。
+4. 结束本次宏任务，（执行下一轮宏任务）。
+
+## 12：Node 中的 Event loop
+
+<https://yuchengkai.cn/docs/frontend/browser.html#poll>
+
+> Node也是单线程，但是在处理Event Loop上与浏览器稍微有些不同，Node新增了两个方法可以用来使用：微任务的process.nextTick以及宏任务的setImmediate。
+
+```JS
+setTimeout(() => {
+    console.log('timer1')
+
+    Promise.resolve().then(function () {
+        console.log('promise1')
+    })
+}, 0);
+
+setTimeout(() => {
+    console.log('timer2')
+
+    Promise.resolve().then(function () {
+        console.log('promise2')
+    })
+}, 0);
+```
+
+### Node事件循环
+
+Node的架构和浏览器实现事件循环的方式也大相径庭。Node的事件循环中有六个阶段，每个阶段中都有一个宏队列，总共只有一个微队列和一个 nextTick队列。
+
+* Timer: SetTimeout和 SetInterval的回调放进该阶段的任务队列。
+* pending callback: 执行一些系统操作的回调，例如TCP的错误。
+* idle, prepare: 处理一些内部调用。
+* poll: 大部分其他回调会被仿佛该阶段的任务队列
+* check: SetImmediate的回调放进该阶段的任务队列。
+* close callback: 一些结束时的回调，例如 Socket.on("close")
+
+> 重点关注三个阶段，Timer、poll、check。
+
+> 低版本（v11.0以前）的Node表现的行为和浏览器环境有很大的不同，是因为低版本下的Node在执行完`一个阶段的所有宏任务再执行微任务`；而高版本的Node表现和浏览器一致，即`执行完一个宏任务再执行微任务`。
+
+```JS
+// 低版本：2134
+// 高版本：2143
+setImmediate(function(){
+    console.log(1);
+    process.nextTick(function(){
+        console.log(4)
+    })
+})
+process.nextTick(function(){
+    console.log(2)
+    setImmediate(function(){
+        console.log(3);
+    })
+})
+```
+
+`setImmediate`为一次Event Loop执行完毕后调用（一次宏任务、微任务结束。第二次宏任务队列调用。check阶段）
+
+### Node 中的 nextTick
+
+> `process.nextTick`是Node独有的一个方法，顾名思义我们可以知道这个方法的目的是让某个任务在下一个 tick的最开始执行。比如，当我们处在一个宏任务阶段调用 process.nextTick，那么会在当前`宏任务执行结束后`，在后续的`微任务阶段执行前`执行 nextTick接受的回调函数。
+
+> Node 中专门维护了一个 `nextTick 队列`, 每当我们执行完一个 tick(也就是执行完当前宏任务后)，就会执行 nextTick队列中的所有任务（微任务队列最前面加了个`nextTick队列`）。
+
+```js
+setTimeout(() => {
+    console.log(1)
+    process.nextTick(() => {
+        console.log(2)
+    })
+}, 0)
+
+new Promise((resolve) => resolve())
+.then(() => {
+    console.log(3)
+    process.nextTick(() => {
+        console.log(4)
+    })
+})
+
+process.nextTick(() => {
+    console.log(5)
+    process.nextTick(() => {
+        console.log(6)
+    })
+    setImmediate(function () {
+        console.log(7)
+    })
+})
+
+process.nextTick(function () {
+    console.log(8)
+    process.nextTick(() => {
+        console.log(9)
+    })
+});
+```
+
+### async/await函数
+
+<https://juejin.cn/post/6844903657264136200#heading-6>
+
+```JS
+setTimeout(_ => console.log(4))
+
+async function main() {
+  console.log(1)
+  await Promise.resolve()
+  console.log(3)
+}
+
+main()
+
+console.log(2)
+```
+
+如上代码:
+
+* async函数在await之前的代码都是同步执行的，可以理解为await之前的代码属于new Promise时传入的代码
+* await之后的所有代码都是在Promise.then中的回调
