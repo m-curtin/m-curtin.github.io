@@ -1,14 +1,16 @@
 ## 参考
 
+[Akara的博客](https://messiahhh.github.io/blog/)
+
+[神三元博客](https://sanyuan0704.top/)
+
+[神三元算法](https://juejin.cn/post/6844904061947346957)
+
 [邈哥的博客](https://top.wsmpage.cn/)
 
 [前端九部](https://www.yuque.com/fe9/basic)
 
 [conardli算法](http://www.conardli.top/docs/)
-
-[神三元博客](http://47.98.159.95/my_blog/nav/)
-
-[神三元算法](http://47.98.159.95/leetcode-js/)  
 
 [cyc计算机基础、Java](https://cyc2018.github.io/CS-Notes/#/)
 

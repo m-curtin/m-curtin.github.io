@@ -10,6 +10,20 @@ JS 中，存在着 7 种原始类型，分别是：<br>
 ### 2. null是对象吗？
 JS 的最初版本中，使用 32 位系统，为了性能考虑使用低位存储了变量的类型信息，检测时 `000` 开头代表是对象，然而 `null` 表示为全零，所以将它错误的判断为 `object`。
 
+### 3. 判断数据类型
+
+基本类型：typeOf
+判断类型：Object.prototype.toString.call(xx)
+
+```js
+Object.prototype.toString.call({a: 1});
+'[object Object]'
+Object.prototype.toString.call(2323);
+'[object Number]'
+Object.prototype.toString.call('asdasd');
+'[object String]'
+```
+
 ## 02：讲讲`symbol`类型
 
 > 概念：ES6 引入了新的原始数据类型 Symbol ，表示独一无二的值，最大的用法是用来定义对象的唯一属性名。
@@ -432,6 +446,27 @@ const newInstanceOf = (A, B) => {
 
 箭头函数不可以使用new实例化，这是因为箭头函数没有prototype也没有自己的this指向并且不可以使用arguments。
 
+new操作干的事情：
+1. 新生成一个对象
+2. 链接到原型
+3. 绑定this
+4. 返回新对象
+
+```js
+function create() {
+  // 创建一个空的对象
+  let obj = new Object()
+  // 获得构造函数
+  let Con = [].shift.call(arguments)
+  // 链接到原型
+  obj.__proto__ = Con.prototype
+  // 绑定 this，执行构造函数
+  let result = Con.apply(obj, arguments)
+  // 确保 new 出来的是个对象
+  return typeof result === 'object' ? result : obj
+}
+```
+
 ## 11：event loop
 
 <https://zhuanlan.zhihu.com/p/33058983>
@@ -589,3 +624,143 @@ console.log(2)
 
 * async函数在await之前的代码都是同步执行的，可以理解为await之前的代码属于new Promise时传入的代码
 * await之后的所有代码都是在Promise.then中的回调
+
+## 13: this
+
+### 常见规则
+
+`this`记住几个规则就可以了。
+
+1. 在函数里面调用this，指向的是window
+2. 作为对象方法调用，this指向的当前对象
+```js
+function foo() {
+	console.log(this.a)
+}
+var a = 1
+foo() // 1
+
+var obj = {
+	a: 2,
+  foo: foo,
+  foo2: () => {
+    console.log(this.a)
+  }
+}
+
+obj.foo2() // 1 箭头函数当前执行作用域在window
+obj.foo() // 2 普通函数当前作用域在调用时这个对象上
+```
+
+3. new 优先级最高，只会绑定到c上，不会被任何方式修改`this`指向
+```js
+var c = new foo()
+c.a = 3
+console.log(c.a)
+```
+
+4. call、apply、bind 改变 this，这个优先级仅次于 new
+
+### 绑定顺序
+
+new => call、apply、bind => 对象方法调用 => 函数直接调用
+
+### 箭头函数
+
+```js
+function a() {
+    return () => {
+        return () => {
+        	console.log(this)
+        }
+    }
+}
+console.log(a()()()) // Window
+```
+
+- 箭头函数没有 `this`，取决于他外面第一个不是箭头函数的`this`
+- this 一旦绑定上下文，就不会被代码改变
+
+## 14: JavaScript 高阶函数
+
+### 应用
+高阶函数可以接收函数作为参数，同时也可以返回一个新的函数。
+
+
+> 高阶函数之所以高阶，是因为高阶函数的参数和返回值对象可以是函数，这超越了普通函数处理的数据类型，例如字符串（strings）、数字（numbers）、布尔值（booleans）等。
+
+JavaScript 中，函数的应用场景很丰富：
+
+- 作为变量存储
+- 在数组中使用
+- 作为对象属性（即方法）
+- 作为参数传递
+- 作为其他函数的返回值
+
+> 理解高阶函数的关键在于，函数即数据。
+
+### 数据是函数运作的基本
+
+```js
+// 字符串
+sayHi = (name) => `Hi, ${name}!`;
+result = sayHi('User');
+console.log(result); // 'Hi, User!'
+
+// 数字（Numbers）
+double = (x) => x * 2;
+result = double(4);
+console.log(result); // 8
+
+// 布尔值（Booleans）
+getClearance = (allowed) => allowed ?  'Access granted' :  'Access denied';
+result1 = getClearance(true);
+result2 = getClearance(false);
+console.log(result1); // 'Access granted'
+console.log(result2); // 'Access denied'
+
+// 对象（Objects）
+getFirstName = (obj) => obj.firstName;
+result = getFirstName({
+	firstName: 'Yazeed'
+});
+console.log(result); // 'Yazeed'
+
+// 数组（Arrays）
+len = (array) => array.length;
+result = len([1, 2, 3]);
+console.log(result); // 3
+
+// 函数作为参数
+isEven = (num) => num % 2 === 0;
+result = [1, 2, 3, 4].filter(isEven);
+console.log(result); // [2, 4]
+```
+
+函数作为返回值：
+
+```js
+const add = (x) => (y) => x + y;
+
+result = add(5)(10);
+add5 = add(5);
+result = add5(10);
+
+console.log({ add5, result });
+// { add5: [Function (anonymous)], result: 15 }
+
+const emptyFunc = () => {};
+
+const handleSquareRes = (func) => {
+  return func(1);
+}
+
+// 函数作为参数，实现函数结果的阶乘
+const emptyFunc = (e) => () => e;
+
+const handleSquareRes = (func) => {
+    return func() * func();
+}
+
+console.log(handleSquareRes(emptyFunc(13223)));
+```

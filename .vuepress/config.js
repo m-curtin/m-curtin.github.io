@@ -10,11 +10,7 @@ module.exports = {
             { text: '主页', link: '/' },
             {
                 text: '前端笔记',
-                items: [
-                    { text: '前端基础', link: '/feInterview/' },
-                    { text: '前端框架', link: '/feFramework/' },
-                    { text: '浏览器相关', link: '/browser/' },
-                ]
+                link: '/feInterview/'
             },
             {
                 text: '计算机基础',
@@ -32,7 +28,11 @@ module.exports = {
         sidebar: {
             '/feInterview/': [
                 ['css', 'CSS'],
-                ['JS_base', 'JS基础']
+                ['JS_base', 'JavaScript'],
+                ['vue', 'Vue'],
+                ['react', 'React'],
+                ['browserBase', '浏览器相关'],
+                ['chrome', 'Chrome']
             ],
             '/JSalgorithm/': [
                 ['regExr', '正则'],
@@ -45,15 +45,9 @@ module.exports = {
                 ['git', 'Git'],
                 ['esp8266', 'ESP8266'],
             ],
-            '/feFramework/': [
-                ['react', 'React']
-            ],
             '/JSachieve/': [
                 ['normalCode', '常见实现'],
             ],
-            '/browser/': [
-                ['chrome', 'Chrome']
-            ]
         },
         sidebarDepth: 2,
         lastUpdated: 'Last Updated',
