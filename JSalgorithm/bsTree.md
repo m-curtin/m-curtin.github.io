@@ -20,6 +20,52 @@
 
 这种存储方式很适合于数据搜索。如下图所示，当需要查找 6 的时候，因为需要查找的值比根节点的值大，所以只需要在根节点的右子树上寻找，大大提高了搜索效率。
 
+## 深度/广度优先遍历
+
+
+### 概念
+
+深度优先遍历(DFS)：尽可能深的搜索树的分支，`尽可能深`
+
+广度优先遍历(BFS)：先访问离根节点最近的节点，`一层一层`
+
+![](https://raw.githubusercontent.com/Nonentityboy/PicGoToGitHub/study_note_blog/20220531114850.png)
+
+### 深度优先遍历算法
+1. 访问根节点
+2. 对根节点的 children 挨个进行深度优先遍历
+
+```js
+const dfs = (root) => {
+    console.log(root.val, {root});
+    root.children.map(dfs);
+};
+
+dfs(tree);
+```
+
+### 广度优先遍历算法
+1. 新建一个队列，把根节点入队。
+2. 把队头出队并访问
+3. 把队头的children挨个入队
+4. 重复第二、三步，直到队列为空
+
+```js
+const bfs = (root) => {
+    const q = [root];
+    while (q.length > 0) {
+        const n = q.shift();
+        console.log(n.val);
+        n.children.forEach(child => {
+            q.push(child);
+        });
+    }
+};
+
+
+bfs(tree);
+```
+
 
 
 ## 二叉树的中序遍历

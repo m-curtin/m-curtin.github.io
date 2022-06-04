@@ -24,6 +24,41 @@ Object.prototype.toString.call('asdasd');
 '[object String]'
 ```
 
+### 4. Object.prototype.toString.call 原理
+
+参考：https://juejin.cn/post/7009659922342215688
+
+对于 Object.prototype.toString() 方法，会返回一个形如 “[object XXX]” 的字符串。
+如果对象的 toString()方法未被重写，就会返回形如上面形式的字符串。
+
+```js
+({}).toString();     // => "[object Object]"
+Math.toString();     // => "[object Math]"
+
+Object.prototype.toString(null) // '[object Object]'
+Object.prototype.toString(undefined) // '[object Object]'
+```
+
+大多数对象对于toString()方法都是重写了的，因此这时需要使用 call()方法来调用未被重写前的toString方法.
+
+```js
+var x = {
+  toString() {
+    return "X";
+  },
+};
+
+x.toString();                                     // => "X"
+Object.prototype.toString(x);                     // '[object Object]
+Object.prototype.toString.call(x);                // => "[object Object]"
+```
+
+
+Object.prototype.toString.call(null);       // => "[object Null]"
+Object.prototype.toString.call(undefined);  // => "[object Undefined]"
+
+
+
 ## 02：讲讲`symbol`类型
 
 > 概念：ES6 引入了新的原始数据类型 Symbol ，表示独一无二的值，最大的用法是用来定义对象的唯一属性名。
@@ -764,3 +799,21 @@ const handleSquareRes = (func) => {
 
 console.log(handleSquareRes(emptyFunc(13223)));
 ```
+
+
+## 15: 同步异步区别
+
+### 单线程与异步
+
+单线程同步导致问题：
+
+- `JS是单线程语言`，只能同时做一件事。
+- 浏览器和 nodejs 支持 JS 启动 `进程`，如 Web Worker
+- JS 和 DOM 渲染共用同一个线程（JS可修改DOM结构）
+
+异步解决问题：
+
+- 遇到等待（网络请求，定时任务）不能卡住
+- 需要异步、回调 callback 形式
+
+
