@@ -409,6 +409,12 @@ var containsDuplicate = function(nums) {
 ### 2. Map
 
 
+### 3. set与map区别
+
+map 与 set 区别及常用方法：https://www.liaoxuefeng.com/wiki/1022910821149312/1023024181109440
+
+for in 与 for of区别： https://juejin.cn/post/6844903601261772808
+
 ## 10：原型链
 
 ### 1. 概念

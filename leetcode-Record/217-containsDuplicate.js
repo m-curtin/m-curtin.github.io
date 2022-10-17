@@ -3,23 +3,24 @@
  * @return {boolean}
  */
 
-var containsDuplicate1 = function(nums) {
+var containsDuplicate = function(nums) {
     nums.sort((a, b) => a - b);
-    for (let i = 0; i < nums.length; i++) {
-        if (nums[i] === nums[i+1]) {
+    for(let i = 0; i < nums.length - 1; i++) {
+        if (nums[i] === nums[i + 1]){
             return true;
         }
     }
     return false;
 };
 
+// map 与 set 区别及常用方法：https://www.liaoxuefeng.com/wiki/1022910821149312/1023024181109440
 var containsDuplicate2 = function(nums) {
-    const set = new Set();
+    let objSet = new Set();
     for (const x of nums) {
-        if (set.has(x)) {
+        if (objSet.has(x)) {
             return true;
         }
-        set.add(x);
+        objSet.add(x);
     }
     return false;
 };
